@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -554,11 +554,11 @@
   </div>
   <div class="auth-right">
     <div class="auth-form-wrap">
-      <div class="auth-title">Welcome back</div>
-      <div class="auth-subtitle">Sign in to your CloseFlow account</div>
-      <div class="auth-tabs">
-        <div class="auth-tab active" onclick="setMode('login')">Sign In</div>
-        <div class="auth-tab" onclick="setMode('signup')">Create Account</div>
+      <div class="auth-title" id="authTitle">Welcome back</div>
+      <div class="auth-subtitle" id="authSubtitle">Sign in to your CloseFlow account</div>
+      <div style="display:flex;gap:8px;margin-bottom:28px;">
+        <button id="btnLogin" onclick="setMode('login')" style="flex:1;padding:16px;background:var(--accent);border:none;color:#000;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.05em;">SIGN IN</button>
+        <button id="btnSignup" onclick="setMode('signup')" style="flex:1;padding:16px;background:var(--surface2);border:1px solid var(--border);color:var(--mid);font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.05em;">SIGN UP</button>
       </div>
       <div class="auth-fields">
         <input class="auth-input" type="email" id="authEmail" placeholder="Email address" />
@@ -679,20 +679,4 @@
   <div id="tabHist" style="display:none">
     <div class="page">
       <div class="page-header">
-        <div class="page-title">History</div>
-        <div class="page-sub">All your past generations — click any to reload the posts.</div>
-      </div>
-      <div id="histList"></div>
-    </div>
-  </div>
-</div>
-
-<script>
-const SB_URL = 'https://jkoecxgkmdfiifrcjfdh.supabase.co';
-const SB_KEY = 'sb_publishable_bc9Sdrar6g6Dg4fc7jX6DQ_Z_3_nnGq';
-const sb = window.supabase.createClient(SB_URL, SB_KEY);
-
-let user = null;
-let mode = 'login';
-let posts = [];
- 
+        <div class="
