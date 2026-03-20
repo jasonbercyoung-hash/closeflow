@@ -3,613 +3,155 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CloseFlow — Real Estate Content Generator</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+<title>CloseFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0d0d0d;
-    --surface: #141414;
-    --surface2: #1a1a1a;
-    --border: #252525;
-    --accent: #e8c96d;
-    --accent-dim: rgba(232,201,109,0.12);
-    --text: #f0ece4;
-    --muted: #666;
-    --mid: #999;
-    --error: #ff6b6b;
-    --success: #6bffb8;
-  }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Outfit', sans-serif;
-    min-height: 100vh;
-  }
-
-  /* Noise overlay */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    opacity: 0.03;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 9999;
-  }
-
-  /* ── AUTH ── */
-  #authScreen {
-    min-height: 100vh;
-    display: flex;
-    align-items: stretch;
-  }
-
-  .auth-left {
-    flex: 1;
-    background: linear-gradient(135deg, #0d0d0d 0%, #1a1500 100%);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 60px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .auth-left::before {
-    content: '';
-    position: absolute;
-    top: -200px; right: -200px;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(232,201,109,0.08) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .auth-brand {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 3.5rem;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1;
-    margin-bottom: 16px;
-  }
-
-  .auth-brand span { color: var(--accent); }
-
-  .auth-brand-sub {
-    font-size: 14px;
-    color: var(--muted);
-    line-height: 1.7;
-    max-width: 320px;
-    margin-bottom: 48px;
-  }
-
-  .auth-feature {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
-  .auth-feature-dot {
-    width: 6px; height: 6px;
-    background: var(--accent);
-    flex-shrink: 0;
-  }
-
-  .auth-feature-text { font-size: 13px; color: var(--mid); }
-
-  .auth-right {
-    width: 440px;
-    background: var(--surface);
-    border-left: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 48px 40px;
-  }
-
-  .auth-form-wrap { width: 100%; }
-
-  .auth-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.8rem;
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-
-  .auth-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
-
-  .auth-tabs {
-    display: flex;
-    gap: 0;
-    margin-bottom: 28px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .auth-tab {
-    flex: 1; padding: 16px 10px; text-align: center;
-    font-size: 15px; font-weight: 600; cursor: pointer;
-    color: var(--muted); border-bottom: 2px solid transparent;
-    margin-bottom: -1px; transition: all 0.15s;
-    user-select: none; -webkit-user-select: none;
-    min-height: 52px; display: flex; align-items: center; justify-content: center;
-  }
-
-  .auth-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-  .auth-fields { display: flex; flex-direction: column; gap: 14px; }
-
-  .auth-input {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'Outfit', sans-serif;
-    font-size: 14px;
-    padding: 13px 16px;
-    outline: none;
-    transition: border-color 0.2s;
-    width: 100%;
-  }
-
-  .auth-input:focus { border-color: var(--accent); }
-  .auth-input::placeholder { color: var(--muted); }
-
-  .auth-btn {
-    width: 100%;
-    background: var(--accent);
-    border: none;
-    color: #000;
-    font-family: 'Outfit', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    padding: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-top: 6px;
-    text-transform: uppercase;
-  }
-
-  .auth-btn:hover { background: #f0d57a; }
-  .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .auth-msg {
-    font-size: 12px;
-    padding: 10px 14px;
-    display: none;
-  }
-
-  .auth-msg.error { background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3); color: var(--error); }
-  .auth-msg.success { background: rgba(107,255,184,0.1); border: 1px solid rgba(107,255,184,0.3); color: var(--success); }
-
-  /* ── APP ── */
-  #appScreen { display: none; }
-
-  .topbar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 60px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .topbar-logo {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  .topbar-logo span { color: var(--accent); }
-
-  .topbar-nav { display: flex; gap: 0; }
-
-  .nav-item {
-    padding: 0 20px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--muted);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.15s;
-  }
-
-  .nav-item:hover { color: var(--text); }
-  .nav-item.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-  .topbar-right { display: flex; align-items: center; gap: 16px; }
-
-  .user-pill {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    padding: 6px 14px;
-    font-size: 12px;
-    color: var(--mid);
-  }
-
-  .signout-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: 'Outfit', sans-serif;
-    font-size: 12px;
-    padding: 6px 14px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .signout-btn:hover { border-color: var(--error); color: var(--error); }
-
-  /* ── GENERATE TAB ── */
-  .page { max-width: 840px; margin: 0 auto; padding: 40px 24px; }
-
-  .page-header { margin-bottom: 36px; }
-
-  .page-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 6px;
-  }
-
-  .page-sub { font-size: 13px; color: var(--muted); }
-
-  .section-head {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .section-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 24px;
-    margin-bottom: 20px;
-  }
-
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .col2 { grid-column: 1 / -1; }
-
-  .field { display: flex; flex-direction: column; gap: 7px; }
-
-  .field label {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .field input,
-  .field select,
-  .field textarea {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'Outfit', sans-serif;
-    font-size: 14px;
-    padding: 11px 14px;
-    outline: none;
-    transition: border-color 0.2s;
-    width: 100%;
-  }
-
-  .field input:focus,
-  .field select:focus,
-  .field textarea:focus { border-color: var(--accent); }
-  .field input::placeholder,
-  .field textarea::placeholder { color: var(--muted); font-size: 13px; }
-  .field select option { background: #1a1a1a; }
-  .field textarea { resize: vertical; min-height: 72px; }
-
-  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
-
-  .pill {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: 'Outfit', sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    padding: 7px 14px;
-    cursor: pointer;
-    transition: all 0.15s;
-    user-select: none;
-  }
-
-  .pill:hover { border-color: var(--accent); color: var(--text); }
-  .pill.on { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
-
-  .gen-btn {
-    width: 100%;
-    background: var(--accent);
-    border: none;
-    color: #000;
-    font-family: 'Outfit', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 18px;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .gen-btn:hover { background: #f0d57a; }
-  .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  /* ── RESULTS ── */
-  .results-wrap { margin-top: 12px; animation: up 0.4s ease both; }
-
-  .results-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 18px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .results-bar-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.3rem;
-    font-weight: 600;
-  }
-
-  .copy-all {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: 'Outfit', sans-serif;
-    font-size: 11px;
-    padding: 6px 14px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .copy-all:hover { border-color: var(--accent); color: var(--accent); }
-
-  .pcard {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    margin-bottom: 10px;
-    transition: border-color 0.2s;
-  }
-
-  .pcard:hover { border-color: #333; }
-
-  .pcard-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 9px 14px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface2);
-  }
-
-  .pcard-meta { display: flex; align-items: center; gap: 10px; }
-
-  .pcard-type {
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    background: var(--accent);
-    color: #000;
-    padding: 3px 8px;
-  }
-
-  .pcard-plat { font-size: 11px; color: var(--muted); }
-  .pcard-num { font-size: 11px; color: var(--border); }
-
-  .pcard-body {
-    padding: 16px;
-    font-size: 13px;
-    line-height: 1.8;
-    color: #ccc;
-    white-space: pre-wrap;
-  }
-
-  .pcard-foot {
-    display: flex;
-    gap: 8px;
-    padding: 9px 14px;
-    border-top: 1px solid var(--border);
-  }
-
-  .pcard-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: 'Outfit', sans-serif;
-    font-size: 11px;
-    padding: 5px 12px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .pcard-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .pcard-btn.done { border-color: var(--success); color: var(--success); }
-
-  /* ── HISTORY ── */
-  .hcard {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 20px 24px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: border-color 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .hcard:hover { border-color: var(--accent); }
-
-  .hcard-left {}
-  .hcard-agent {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-
-  .hcard-meta { font-size: 12px; color: var(--muted); }
-  .hcard-badge {
-    display: inline-block;
-    background: var(--accent-dim);
-    border: 1px solid rgba(232,201,109,0.3);
-    color: var(--accent);
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 8px;
-    margin-right: 8px;
-  }
-
-  .hcard-right { color: var(--muted); font-size: 18px; }
-
-  .empty-state {
-    text-align: center;
-    padding: 80px 24px;
-    color: var(--muted);
-  }
-
-  .empty-icon { font-size: 2.5rem; margin-bottom: 16px; opacity: 0.3; }
-
-  .empty-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.3rem;
-    color: #555;
-    margin-bottom: 8px;
-  }
-
-  .empty-sub { font-size: 13px; }
-
-  /* ── MISC ── */
-  .notice {
-    padding: 12px 16px;
-    font-size: 13px;
-    margin-top: 12px;
-    display: none;
-  }
-
-  .notice.error { background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.25); color: var(--error); }
-  .notice.saved { background: rgba(107,255,184,0.06); border: 1px solid rgba(107,255,184,0.2); color: var(--success); }
-
-  .spin {
-    display: inline-block;
-    width: 13px; height: 13px;
-    border: 2px solid rgba(0,0,0,0.3);
-    border-top-color: #000;
-    border-radius: 50%;
-    animation: rot 0.6s linear infinite;
-    margin-right: 8px;
-    vertical-align: middle;
-  }
-
-  @keyframes up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes rot { to { transform: rotate(360deg); } }
-
-  @media (max-width: 700px) {
-    .auth-left { display: none; }
-    .auth-right { width: 100%; border: none; }
-    .grid2 { grid-template-columns: 1fr; }
-    .card { padding: 18px; }
-    .topbar { padding: 0 16px; }
-    .page { padding: 24px 16px; }
-  }
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d0d0d;--s:#141414;--s2:#1a1a1a;--b:#252525;--a:#e8c96d;--t:#f0ece4;--m:#666;--mid:#999;--err:#ff6b6b;--ok:#6bffb8}
+body{background:var(--bg);color:var(--t);font-family:'Outfit',sans-serif;min-height:100vh}
+.page{display:none}
+.page.on{display:block}
+
+/* AUTH */
+#auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.abox{width:100%;max-width:400px;background:var(--s);border:1px solid var(--b);padding:40px 32px}
+.logo{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:700;text-align:center;margin-bottom:6px}
+.logo span{color:var(--a)}
+.tagline{text-align:center;color:var(--m);font-size:13px;margin-bottom:36px}
+.abtns{display:flex;gap:8px;margin-bottom:24px}
+.abtn{flex:1;padding:14px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;border:2px solid var(--b);background:var(--s2);color:var(--mid);transition:all .15s}
+.abtn.on{background:var(--a);border-color:var(--a);color:#000}
+.aform{display:none}
+.aform.on{display:block}
+.ainput{display:block;width:100%;background:var(--s2);border:1px solid var(--b);color:var(--t);font-family:'Outfit',sans-serif;font-size:14px;padding:13px 16px;outline:none;margin-bottom:12px;transition:border-color .2s}
+.ainput:focus{border-color:var(--a)}
+.ainput::placeholder{color:var(--m)}
+.asubmit{width:100%;padding:15px;background:var(--a);border:none;color:#000;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+.asubmit:hover{background:#f0d57a}
+.amsg{font-size:12px;padding:10px 14px;margin-bottom:12px;display:none}
+.amsg.err{background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);color:var(--err)}
+.amsg.ok{background:rgba(107,255,184,.1);border:1px solid rgba(107,255,184,.3);color:var(--ok)}
+
+/* APP */
+.bar{background:var(--s);border-bottom:1px solid var(--b);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:99}
+.barlogo{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700}
+.barlogo span{color:var(--a)}
+.barnav{display:flex}
+.navbtn{padding:0 16px;height:56px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--m);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.navbtn.on{color:var(--a);border-bottom-color:var(--a)}
+.barright{display:flex;align-items:center;gap:12px}
+.userpill{font-size:11px;color:var(--mid);background:var(--s2);border:1px solid var(--b);padding:5px 12px}
+.soBtn{background:transparent;border:1px solid var(--b);color:var(--m);font-family:'Outfit',sans-serif;font-size:11px;padding:5px 12px;cursor:pointer}
+.soBtn:hover{border-color:var(--err);color:var(--err)}
+
+/* CONTENT */
+.wrap{max-width:820px;margin:0 auto;padding:36px 20px}
+.sh{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--a);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sh::after{content:'';flex:1;height:1px;background:var(--b)}
+.card{background:var(--s);border:1px solid var(--b);padding:22px;margin-bottom:18px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.fc{display:flex;flex-direction:column;gap:6px}
+.fc.span2{grid-column:1/-1}
+.fc label{font-size:10px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--m)}
+.fc input,.fc select,.fc textarea{background:var(--s2);border:1px solid var(--b);color:var(--t);font-family:'Outfit',sans-serif;font-size:14px;padding:11px 14px;outline:none;transition:border-color .2s;width:100%}
+.fc input:focus,.fc select:focus,.fc textarea:focus{border-color:var(--a)}
+.fc input::placeholder,.fc textarea::placeholder{color:var(--m);font-size:13px}
+.fc select option{background:#1a1a1a}
+.fc textarea{resize:vertical;min-height:70px}
+.pills{display:flex;flex-wrap:wrap;gap:7px}
+.pill{background:var(--s2);border:1px solid var(--b);color:var(--m);font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;padding:7px 13px;cursor:pointer;transition:all .15s;user-select:none}
+.pill:hover{border-color:var(--a);color:var(--t)}
+.pill.on{background:rgba(232,201,109,.12);border-color:var(--a);color:var(--a)}
+.genbtn{width:100%;background:var(--a);border:none;color:#000;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:17px;cursor:pointer;transition:background .2s}
+.genbtn:hover{background:#f0d57a}
+.genbtn:disabled{opacity:.5;cursor:not-allowed}
+.notice{padding:11px 14px;font-size:13px;margin-top:10px;display:none}
+.notice.err{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.25);color:var(--err)}
+.notice.ok{background:rgba(107,255,184,.06);border:1px solid rgba(107,255,184,.2);color:var(--ok)}
+
+/* POSTS */
+.rbar{display:flex;align-items:center;justify-content:space-between;margin:20px 0 16px}
+.rtitle{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700}
+.cpall{background:transparent;border:1px solid var(--b);color:var(--m);font-family:'Outfit',sans-serif;font-size:11px;padding:6px 13px;cursor:pointer;transition:all .15s}
+.cpall:hover{border-color:var(--a);color:var(--a)}
+.pcard{background:var(--s);border:1px solid var(--b);margin-bottom:9px}
+.phead{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--b);background:var(--s2)}
+.pmeta{display:flex;align-items:center;gap:9px}
+.ptype{font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;background:var(--a);color:#000;padding:3px 7px}
+.pplat{font-size:11px;color:var(--m)}
+.pnum{font-size:11px;color:var(--b)}
+.pbody{padding:15px;font-size:13px;line-height:1.8;color:#ccc;white-space:pre-wrap}
+.pfoot{display:flex;gap:7px;padding:9px 14px;border-top:1px solid var(--b)}
+.pbtn{background:transparent;border:1px solid var(--b);color:var(--m);font-family:'Outfit',sans-serif;font-size:11px;padding:5px 11px;cursor:pointer;transition:all .15s}
+.pbtn:hover{border-color:var(--a);color:var(--a)}
+.pbtn.done{border-color:var(--ok);color:var(--ok)}
+
+/* HISTORY */
+.hcard{background:var(--s);border:1px solid var(--b);padding:18px 22px;margin-bottom:9px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:border-color .2s}
+.hcard:hover{border-color:var(--a)}
+.hagent{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:700;margin-bottom:5px}
+.hmeta{font-size:12px;color:var(--m)}
+.hbadge{display:inline-block;background:rgba(232,201,109,.12);border:1px solid rgba(232,201,109,.3);color:var(--a);font-size:10px;font-weight:600;padding:2px 7px;margin-right:7px}
+.empty{text-align:center;padding:60px 20px;color:var(--m)}
+.empty h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:#555;margin-bottom:8px}
+
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:rot .6s linear infinite;margin-right:7px;vertical-align:middle}
+@keyframes rot{to{transform:rotate(360deg)}}
+@media(max-width:600px){.g2{grid-template-columns:1fr}.card{padding:16px}.wrap{padding:20px 16px}.bar{padding:0 16px}}
 </style>
 </head>
 <body>
 
-<!-- ── AUTH ── -->
-<div id="authScreen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:24px;">
-  <div style="width:100%;max-width:400px;">
-    <div style="font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:700;text-align:center;margin-bottom:8px;">Close<span style="color:var(--accent);">Flow</span></div>
-    <div style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:40px;">The content engine for real estate professionals</div>
-
-    <!-- LOGIN FORM -->
-    <div id="loginForm">
-      <div style="font-size:18px;font-weight:600;margin-bottom:20px;">Sign In</div>
-      <input class="auth-input" type="email" id="loginEmail" placeholder="Email address" style="margin-bottom:12px;" />
-      <input class="auth-input" type="password" id="loginPassword" placeholder="Password" style="margin-bottom:12px;" />
-      <div class="auth-msg" id="loginMsg"></div>
-      <button onclick="doLogin()" style="width:100%;padding:16px;background:var(--accent);border:none;color:#000;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:16px;">SIGN IN</button>
-      <div style="text-align:center;font-size:13px;color:var(--muted);">No account? <span onclick="showSignup()" style="color:var(--accent);cursor:pointer;font-weight:600;">Create one here</span></div>
+<!-- AUTH -->
+<div id="auth" class="page on">
+  <div class="abox">
+    <div class="logo">Close<span>Flow</span></div>
+    <div class="tagline">Real estate content, generated in seconds</div>
+    <div class="abtns">
+      <button class="abtn on" id="btnLI" onclick="showForm('login')">Sign In</button>
+      <button class="abtn" id="btnSU" onclick="showForm('signup')">Sign Up</button>
     </div>
-
-    <!-- SIGNUP FORM -->
-    <div id="signupForm" style="display:none;">
-      <div style="font-size:18px;font-weight:600;margin-bottom:20px;">Create Account</div>
-      <input class="auth-input" type="email" id="signupEmail" placeholder="Email address" style="margin-bottom:12px;" />
-      <input class="auth-input" type="password" id="signupPassword" placeholder="Password (min 6 characters)" style="margin-bottom:12px;" />
-      <div class="auth-msg" id="signupMsg"></div>
-      <button onclick="doSignup()" style="width:100%;padding:16px;background:var(--accent);border:none;color:#000;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:16px;">CREATE ACCOUNT</button>
-      <div style="text-align:center;font-size:13px;color:var(--muted);">Have an account? <span onclick="showLogin()" style="color:var(--accent);cursor:pointer;font-weight:600;">Sign in here</span></div>
+    <!-- Login -->
+    <div class="aform on" id="formLogin">
+      <div class="amsg" id="msgLogin"></div>
+      <input class="ainput" type="email" id="liEmail" placeholder="Email address" />
+      <input class="ainput" type="password" id="liPass" placeholder="Password" />
+      <button class="asubmit" onclick="doLogin()">Sign In</button>
     </div>
-
+    <!-- Signup -->
+    <div class="aform" id="formSignup">
+      <div class="amsg" id="msgSignup"></div>
+      <input class="ainput" type="email" id="suEmail" placeholder="Email address" />
+      <input class="ainput" type="password" id="suPass" placeholder="Password (min 6 chars)" />
+      <button class="asubmit" onclick="doSignup()">Create Account</button>
+    </div>
   </div>
 </div>
 
-<!-- ── APP ── -->
-<div id="appScreen">
-  <div class="topbar">
-    <div class="topbar-logo">Close<span>Flow</span></div>
-    <div class="topbar-nav">
-      <div class="nav-item active" id="navGen" onclick="goTab('gen')">Generate</div>
-      <div class="nav-item" id="navHist" onclick="goTab('hist')">History</div>
+<!-- APP -->
+<div id="app" class="page">
+  <div class="bar">
+    <div class="barlogo">Close<span>Flow</span></div>
+    <div class="barnav">
+      <div class="navbtn on" id="navG" onclick="goTab('gen')">Generate</div>
+      <div class="navbtn" id="navH" onclick="goTab('hist')">History</div>
     </div>
-    <div class="topbar-right">
-      <div class="user-pill" id="userPill"></div>
-      <button class="signout-btn" onclick="doSignout()">Sign Out</button>
+    <div class="barright">
+      <div class="userpill" id="uEmail"></div>
+      <button class="soBtn" onclick="signOut()">Sign Out</button>
     </div>
   </div>
 
-  <!-- GENERATE -->
-  <div id="tabGen">
-    <div class="page">
-      <div class="page-header">
-        <div class="page-title">Generate Content</div>
-        <div class="page-sub">Fill in your details and get a full month of posts instantly.</div>
-      </div>
-
-      <div class="section-head">Agent Info</div>
+  <!-- Generate -->
+  <div id="tabGen" class="page on">
+    <div class="wrap">
+      <div class="sh">Agent Info</div>
       <div class="card">
-        <div class="grid2">
-          <div class="field">
-            <label>Agent / Team Name</label>
-            <input type="text" id="agentName" placeholder="e.g. Sarah Johnson Realty" />
-          </div>
-          <div class="field">
-            <label>City / Market</label>
-            <input type="text" id="city" placeholder="e.g. Austin, TX" />
-          </div>
-          <div class="field">
-            <label>Brokerage</label>
-            <input type="text" id="brokerage" placeholder="e.g. RE/MAX, Keller Williams..." />
-          </div>
-          <div class="field">
-            <label>Tone</label>
+        <div class="g2">
+          <div class="fc"><label>Agent / Team Name</label><input type="text" id="agentName" placeholder="e.g. Sarah Johnson Realty"/></div>
+          <div class="fc"><label>City / Market</label><input type="text" id="city" placeholder="e.g. Austin, TX"/></div>
+          <div class="fc"><label>Brokerage</label><input type="text" id="brokerage" placeholder="e.g. RE/MAX..."/></div>
+          <div class="fc"><label>Tone</label>
             <select id="tone">
               <option>Professional & Trustworthy</option>
               <option>Warm & Approachable</option>
@@ -618,18 +160,12 @@
               <option>Educational & Informative</option>
             </select>
           </div>
-          <div class="field col2">
-            <label>Specialties / USP (optional)</label>
-            <input type="text" id="usp" placeholder="e.g. First-time buyers, luxury condos, investment properties..." />
-          </div>
-          <div class="field col2">
-            <label>Current Listing (optional)</label>
-            <input type="text" id="listing" placeholder="e.g. 3bd/2ba in Oak Park, $485K — just listed" />
-          </div>
+          <div class="fc span2"><label>Specialties (optional)</label><input type="text" id="usp" placeholder="e.g. First-time buyers, luxury condos..."/></div>
+          <div class="fc span2"><label>Current Listing (optional)</label><input type="text" id="listing" placeholder="e.g. 3bd/2ba Oak Park $485K"/></div>
         </div>
       </div>
 
-      <div class="section-head">Content Types</div>
+      <div class="sh">Content Types</div>
       <div class="card">
         <div class="pills" id="typePills">
           <div class="pill on" data-v="New Listing">🏡 New Listing</div>
@@ -644,11 +180,10 @@
         </div>
       </div>
 
-      <div class="section-head">Platforms & Volume</div>
+      <div class="sh">Platforms & Volume</div>
       <div class="card">
-        <div class="grid2">
-          <div class="field col2">
-            <label>Platforms</label>
+        <div class="g2">
+          <div class="fc span2"><label>Platforms</label>
             <div class="pills" id="platPills">
               <div class="pill on" data-v="Instagram">Instagram</div>
               <div class="pill on" data-v="Facebook">Facebook</div>
@@ -657,10 +192,9 @@
               <div class="pill" data-v="TikTok">TikTok</div>
             </div>
           </div>
-          <div class="field">
-            <label>Posts to Generate</label>
+          <div class="fc"><label>Posts to Generate</label>
             <select id="postCount">
-              <option value="5">5 posts — Quick Preview</option>
+              <option value="5">5 posts — Preview</option>
               <option value="10" selected>10 posts</option>
               <option value="20">20 posts</option>
               <option value="30">30 posts — Full Month</option>
@@ -669,7 +203,181 @@
         </div>
       </div>
 
-      <button class="gen-btn" id="genBtn" onclick="generate()">Generate Content</button>
-      <div class="notice error" id="errBox"></div>
-      <div class="notice saved" id="savedBox">✓ Saved to your history.</div>
-      <div id="resultsWrap" style="
+      <button class="genbtn" id="genBtn" onclick="generate()">Generate Content</button>
+      <div class="notice err" id="genErr"></div>
+      <div class="notice ok" id="genOk"></div>
+      <div id="results" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div id="tabHist" class="page">
+    <div class="wrap">
+      <div class="sh">History</div>
+      <div id="histList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const URL_ = 'https://jkoecxgkmdfiifrcjfdh.supabase.co';
+const KEY_ = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imprb2VjeGdrbWRmaWlmcmNqZmRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5OTUzMDEsImV4cCI6MjA4OTU3MTMwMX0.xmGsEpoZCddQwN2s5wnKQcdvCG6qn2Fdob2hpL9g6pA';
+let token = null, user = null, posts = [], histData = [];
+
+const h = (s,d) => ({...{'Content-Type':'application/json','apikey':KEY_},...(d?{'Authorization':'Bearer '+d}:{})});
+
+async function api(path, method='GET', body=null, tok=null) {
+  const r = await fetch(URL_+path, {method, headers:h(null,tok), body:body?JSON.stringify(body):null});
+  return r.json();
+}
+
+// ── AUTH FORMS ──
+function showForm(f) {
+  document.getElementById('formLogin').classList.toggle('on', f==='login');
+  document.getElementById('formSignup').classList.toggle('on', f==='signup');
+  document.getElementById('btnLI').classList.toggle('on', f==='login');
+  document.getElementById('btnSU').classList.toggle('on', f==='signup');
+}
+
+function msg(id, text, type) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'amsg ' + type;
+  el.style.display = 'block';
+}
+
+async function doLogin() {
+  const email = document.getElementById('liEmail').value.trim();
+  const pass = document.getElementById('liPass').value;
+  if (!email||!pass) return msg('msgLogin','Enter email and password','err');
+  msg('msgLogin','Signing in...','ok');
+  const d = await api('/auth/v1/token?grant_type=password','POST',{email,password:pass});
+  if (!d.access_token) return msg('msgLogin', d.error_description||d.msg||'Invalid credentials','err');
+  token = d.access_token;
+  user = {id:d.user.id, email:d.user.email};
+  bootApp();
+}
+
+async function doSignup() {
+  const email = document.getElementById('suEmail').value.trim();
+  const pass = document.getElementById('suPass').value;
+  if (!email||!pass) return msg('msgSignup','Enter email and password','err');
+  if (pass.length < 6) return msg('msgSignup','Password must be 6+ characters','err');
+  msg('msgSignup','Creating account...','ok');
+  const d = await api('/auth/v1/signup','POST',{email,password:pass});
+  if (d.error) return msg('msgSignup', d.msg||d.error,'err');
+  if (d.access_token) {
+    token = d.access_token;
+    user = {id:d.user.id, email:d.user.email};
+    bootApp();
+  } else {
+    msg('msgSignup','Account created! Now sign in.','ok');
+    showForm('login');
+  }
+}
+
+function bootApp() {
+  document.getElementById('auth').classList.remove('on');
+  document.getElementById('app').classList.add('on');
+  document.getElementById('uEmail').textContent = user.email;
+}
+
+function signOut() {
+  token=null; user=null;
+  document.getElementById('app').classList.remove('on');
+  document.getElementById('auth').classList.add('on');
+}
+
+// ── TABS ──
+function goTab(t) {
+  ['gen','hist'].forEach(x => {
+    document.getElementById('nav'+x[0].toUpperCase()+x.slice(1)).classList.toggle('on',x===t);
+    document.getElementById('tab'+x[0].toUpperCase()+x.slice(1)).classList.toggle('on',x===t);
+  });
+  if (t==='hist') loadHistory();
+}
+
+// Wait that's wrong, fix tab IDs
+function goTab(t) {
+  document.getElementById('navG').classList.toggle('on', t==='gen');
+  document.getElementById('navH').classList.toggle('on', t==='hist');
+  document.getElementById('tabGen').classList.toggle('on', t==='gen');
+  document.getElementById('tabHist').classList.toggle('on', t==='hist');
+  if (t==='hist') loadHistory();
+}
+
+// ── PILLS ──
+document.querySelectorAll('.pill').forEach(p => p.addEventListener('click', ()=> p.classList.toggle('on')));
+const getVals = id => [...document.querySelectorAll('#'+id+' .pill.on')].map(p=>p.dataset.v);
+
+// ── GENERATE ──
+async function generate() {
+  const agentName = document.getElementById('agentName').value.trim();
+  const city = document.getElementById('city').value.trim();
+  const brokerage = document.getElementById('brokerage').value.trim();
+  const tone = document.getElementById('tone').value;
+  const usp = document.getElementById('usp').value.trim();
+  const listing = document.getElementById('listing').value.trim();
+  const postCount = document.getElementById('postCount').value;
+  const types = getVals('typePills');
+  const plats = getVals('platPills');
+  const btn = document.getElementById('genBtn');
+  const errEl = document.getElementById('genErr');
+  const okEl = document.getElementById('genOk');
+  const res = document.getElementById('results');
+
+  errEl.style.display='none'; okEl.style.display='none'; res.style.display='none';
+  if (!agentName) { errEl.textContent='⚠ Enter an agent name'; errEl.style.display='block'; return; }
+  if (!city) { errEl.textContent='⚠ Enter a city'; errEl.style.display='block'; return; }
+  if (!types.length) { errEl.textContent='⚠ Select a content type'; errEl.style.display='block'; return; }
+  if (!plats.length) { errEl.textContent='⚠ Select a platform'; errEl.style.display='block'; return; }
+
+  btn.disabled=true;
+  btn.innerHTML='<span class="spin"></span>Generating...';
+
+  const prompt = `Generate exactly ${postCount} real estate social media posts.
+Agent: ${agentName}, Market: ${city}${brokerage?', Brokerage: '+brokerage:''}
+Tone: ${tone}${usp?', Specialties: '+usp:''}${listing?', Listing: '+listing:''}
+Content types (rotate): ${types.join(', ')}
+Platforms (rotate): ${plats.join(', ')}
+Rules: authentic human tone, natural emojis, 3-5 hashtags per post, reference ${city}, vary length, never repeat opening lines.
+Return ONLY a JSON array. Each item: {"platform","contentType","postNumber","content"}`;
+
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+    });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error.message);
+    const raw = d.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim();
+    posts = JSON.parse(raw);
+    renderPosts(posts, agentName);
+
+    if (user && token) {
+      await fetch(`${URL_}/rest/v1/generations`, {
+        method:'POST',
+        headers:{...h(null,token),'Prefer':'return=minimal'},
+        body: JSON.stringify({user_id:user.id,agent_name:agentName,city,platforms:plats,content_types:types,post_count:parseInt(postCount),posts,created_at:new Date().toISOString()})
+      });
+      okEl.textContent='✓ Saved to history.';
+      okEl.style.display='block';
+    }
+  } catch(e) {
+    errEl.textContent='⚠ Error: '+e.message;
+    errEl.style.display='block';
+  } finally {
+    btn.disabled=false;
+    btn.textContent='Generate Content';
+  }
+}
+
+const tColors={'New Listing':'#b8860b','Just Sold':'#c9a84c','Market Update':'#2a6a8a','Home Buying Tip':'#6a2a8a','Home Selling Tip':'#8a2a2a','Neighbourhood Spotlight':'#2a8a6a','Open House':'#2a5a8a','Client Testimonial':'#8a6a2a','Interest Rate Update':'#6a8a2a'};
+
+function renderPosts(data, name) {
+  const res = document.getElementById('results');
+  let html = `<div class="rbar"><div class="rtitle">${data.length} posts for ${name}</div><button class="cpall" onclick="copyAll()">Copy All</button></div>`;
+  data.forEach((p,i) => {
+    const c = tColors[p.contentType]||'#c9a84c';
+    html += `<div class="pcard"><div class="phead"><div class="pmeta"><span class="ptype"
