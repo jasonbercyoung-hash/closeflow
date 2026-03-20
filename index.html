@@ -129,10 +129,12 @@
   }
 
   .auth-tab {
-    flex: 1; padding: 10px; text-align: center;
-    font-size: 13px; font-weight: 500; cursor: pointer;
+    flex: 1; padding: 16px 10px; text-align: center;
+    font-size: 15px; font-weight: 600; cursor: pointer;
     color: var(--muted); border-bottom: 2px solid transparent;
     margin-bottom: -1px; transition: all 0.15s;
+    user-select: none; -webkit-user-select: none;
+    min-height: 52px; display: flex; align-items: center; justify-content: center;
   }
 
   .auth-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
@@ -693,9 +695,4 @@ const sb = window.supabase.createClient(SB_URL, SB_KEY);
 let user = null;
 let mode = 'login';
 let posts = [];
-let histData = [];
-
-// ── AUTH ──
-function setMode(m) {
-  mode = m;
-  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.
+ 
