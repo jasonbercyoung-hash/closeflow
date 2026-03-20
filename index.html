@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -543,30 +543,31 @@
 <body>
 
 <!-- ── AUTH ── -->
-<div id="authScreen">
-  <div class="auth-left">
-    <div class="auth-brand">Close<span>Flow</span></div>
-    <div class="auth-brand-sub">The content engine built exclusively for real estate professionals.</div>
-    <div class="auth-feature"><div class="auth-feature-dot"></div><div class="auth-feature-text">30 posts generated in under 10 seconds</div></div>
-    <div class="auth-feature"><div class="auth-feature-dot"></div><div class="auth-feature-text">Instagram, Facebook, LinkedIn, Twitter & TikTok</div></div>
-    <div class="auth-feature"><div class="auth-feature-dot"></div><div class="auth-feature-text">Listings, market updates, tips & testimonials</div></div>
-    <div class="auth-feature"><div class="auth-feature-dot"></div><div class="auth-feature-text">Full history — access your content anytime</div></div>
-  </div>
-  <div class="auth-right">
-    <div class="auth-form-wrap">
-      <div class="auth-title" id="authTitle">Welcome back</div>
-      <div class="auth-subtitle" id="authSubtitle">Sign in to your CloseFlow account</div>
-      <div style="display:flex;gap:8px;margin-bottom:28px;">
-        <button id="btnLogin" onclick="setMode('login')" style="flex:1;padding:16px;background:var(--accent);border:none;color:#000;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.05em;">SIGN IN</button>
-        <button id="btnSignup" onclick="setMode('signup')" style="flex:1;padding:16px;background:var(--surface2);border:1px solid var(--border);color:var(--mid);font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.05em;">SIGN UP</button>
-      </div>
-      <div class="auth-fields">
-        <input class="auth-input" type="email" id="authEmail" placeholder="Email address" />
-        <input class="auth-input" type="password" id="authPassword" placeholder="Password" />
-        <div class="auth-msg" id="authMsg"></div>
-        <button class="auth-btn" id="authBtn" onclick="doAuth()">Sign In</button>
-      </div>
+<div id="authScreen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:24px;">
+  <div style="width:100%;max-width:400px;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:700;text-align:center;margin-bottom:8px;">Close<span style="color:var(--accent);">Flow</span></div>
+    <div style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:40px;">The content engine for real estate professionals</div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+      <div style="font-size:18px;font-weight:600;margin-bottom:20px;">Sign In</div>
+      <input class="auth-input" type="email" id="loginEmail" placeholder="Email address" style="margin-bottom:12px;" />
+      <input class="auth-input" type="password" id="loginPassword" placeholder="Password" style="margin-bottom:12px;" />
+      <div class="auth-msg" id="loginMsg"></div>
+      <button onclick="doLogin()" style="width:100%;padding:16px;background:var(--accent);border:none;color:#000;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:16px;">SIGN IN</button>
+      <div style="text-align:center;font-size:13px;color:var(--muted);">No account? <span onclick="showSignup()" style="color:var(--accent);cursor:pointer;font-weight:600;">Create one here</span></div>
     </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="signupForm" style="display:none;">
+      <div style="font-size:18px;font-weight:600;margin-bottom:20px;">Create Account</div>
+      <input class="auth-input" type="email" id="signupEmail" placeholder="Email address" style="margin-bottom:12px;" />
+      <input class="auth-input" type="password" id="signupPassword" placeholder="Password (min 6 characters)" style="margin-bottom:12px;" />
+      <div class="auth-msg" id="signupMsg"></div>
+      <button onclick="doSignup()" style="width:100%;padding:16px;background:var(--accent);border:none;color:#000;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:16px;">CREATE ACCOUNT</button>
+      <div style="text-align:center;font-size:13px;color:var(--muted);">Have an account? <span onclick="showLogin()" style="color:var(--accent);cursor:pointer;font-weight:600;">Sign in here</span></div>
+    </div>
+
   </div>
 </div>
 
@@ -670,13 +671,4 @@
 
       <button class="gen-btn" id="genBtn" onclick="generate()">Generate Content</button>
       <div class="notice error" id="errBox"></div>
-      <div class="notice saved" id="savedBox">✓ Saved to your history.</div>
-      <div id="resultsWrap" style="display:none" class="results-wrap"></div>
-    </div>
-  </div>
-
-  <!-- HISTORY -->
-  <div id="tabHist" style="display:none">
-    <div class="page">
-      <div class="page-header">
-        <div class="
+      <div class="notice saved" id="
