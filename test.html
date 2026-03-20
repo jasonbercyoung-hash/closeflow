@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>Test</h1>
+<button onclick="alert('button works')">Tap Me</button>
+<br><br>
+<button onclick="testSupabase()">Test Supabase</button>
+<div id="out" style="margin-top:20px;color:white;background:#111;padding:10px;"></div>
+<script>
+async function testSupabase() {
+  document.getElementById('out').textContent = 'Testing...';
+  try {
+    const res = await fetch('https://jkoecxgkmdfiifrcjfdh.supabase.co/auth/v1/settings', {
+      headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imprb2VjeGdrbWRmaWlmcmNqZmRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5OTUzMDEsImV4cCI6MjA4OTU3MTMwMX0.xmGsEpoZCddQwN2s5wnKQcdvCG6qn2Fdob2hpL9g6pA' }
+    });
+    document.getElementById('out').textContent = 'Status: ' + res.status;
+  } catch(e) {
+    document.getElementById('out').textContent = 'Error: ' + e.message;
+  }
+}
+</script>
+</body>
+</html>
