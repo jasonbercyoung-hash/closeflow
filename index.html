@@ -301,15 +301,6 @@ function signOut() {
 
 // ── TABS ──
 function goTab(t) {
-  ['gen','hist'].forEach(x => {
-    document.getElementById('nav'+x[0].toUpperCase()+x.slice(1)).classList.toggle('on',x===t);
-    document.getElementById('tab'+x[0].toUpperCase()+x.slice(1)).classList.toggle('on',x===t);
-  });
-  if (t==='hist') loadHistory();
-}
-
-// Wait that's wrong, fix tab IDs
-function goTab(t) {
   document.getElementById('navG').classList.toggle('on', t==='gen');
   document.getElementById('navH').classList.toggle('on', t==='hist');
   document.getElementById('tabGen').classList.toggle('on', t==='gen');
@@ -387,4 +378,8 @@ Return ONLY a JSON array. Each item: {"platform","contentType","postNumber","con
 const tColors={'New Listing':'#b8860b','Just Sold':'#c9a84c','Market Update':'#2a6a8a','Home Buying Tip':'#6a2a8a','Home Selling Tip':'#8a2a2a','Neighbourhood Spotlight':'#2a8a6a','Open House':'#2a5a8a','Client Testimonial':'#8a6a2a','Interest Rate Update':'#6a8a2a'};
 
 function renderPosts(data, name) {
-  const res = document.getElementById('
+  const res = document.getElementById('results');
+  let html = `<div class="rbar"><div class="rtitle">${data.length} posts for ${name}</div><button class="cpall" onclick="copyAll()">Copy All</button></div>`;
+  data.forEach((p,i) => {
+    const c = tColors[p.contentType]||'#c9a84c';
+    html += `<div class="pcard"><div class="phead"><div class="pmeta"><spa
