@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CloseFlow — Real Estate Content Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d;
+    --surface: #141414;
+    --surface2: #1a1a1a;
+    --border: #252525;
+    --accent: #e8c96d;
+    --accent-dim: rgba(232,201,109,0.12);
+    --text: #f0ece4;
+    --muted: #666;
+    --mid: #999;
+    --error: #ff6b6b;
+    --success: #6bffb8;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* Noise overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── AUTH ── */
+  #authScreen {
+    min-height: 100vh;
+    display: flex;
+    align-items: stretch;
+  }
+
+  .auth-left {
+    flex: 1;
+    background: linear-gradient(135deg, #0d0d0d 0%, #1a1500 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .auth-left::before {
+    content: '';
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(232,201,109,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .auth-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+
+  .auth-brand span { color: var(--accent); }
+
+  .auth-brand-sub {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 320px;
+    margin-bottom: 48px;
+  }
+
+  .auth-feature {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .auth-feature-dot {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .auth-feature-text { font-size: 13px; color: var(--mid); }
+
+  .auth-right {
+    width: 440px;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 40px;
+  }
+
+  .auth-form-wrap { width: 100%; }
+
+  .auth-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .auth-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
+
+  .auth-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .auth-tab {
+    flex: 1; padding: 10px; text-align: center;
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    color: var(--muted); border-bottom: 2px solid transparent;
+    margin-bottom: -1px; transition: all 0.15s;
+  }
+
+  .auth-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .auth-fields { display: flex; flex-direction: column; gap: 14px; }
+
+  .auth-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    padding: 13px 16px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .auth-input:focus { border-color: var(--accent); }
+  .auth-input::placeholder { color: var(--muted); }
+
+  .auth-btn {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    color: #000;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 6px;
+    text-transform: uppercase;
+  }
+
+  .auth-btn:hover { background: #f0d57a; }
+  .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .auth-msg {
+    font-size: 12px;
+    padding: 10px 14px;
+    display: none;
+  }
+
+  .auth-msg.error { background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3); color: var(--error); }
+  .auth-msg.success { background: rgba(107,255,184,0.1); border: 1px solid rgba(107,255,184,0.3); color: var(--success); }
+
+  /* ── APP ── */
+  #appScreen { display: none; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .topbar-logo span { color: var(--accent); }
+
+  .topbar-nav { display: flex; gap: 0; }
+
+  .nav-item {
+    padding: 0 20px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .nav-item:hover { color: var(--text); }
+  .nav-item.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+
+  .user-pill {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    font-size: 12px;
+    color: var(--mid);
+  }
+
+  .signout-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .signout-btn:hover { border-color: var(--error); color: var(--error); }
+
+  /* ── GENERATE TAB ── */
+  .page { max-width: 840px; margin: 0 auto; padding: 40px 24px; }
+
+  .page-header { margin-bottom: 36px; }
+
+  .page-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .page-sub { font-size: 13px; color: var(--muted); }
+
+  .section-head {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .col2 { grid-column: 1 / -1; }
+
+  .field { display: flex; flex-direction: column; gap: 7px; }
+
+  .field label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    padding: 11px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus { border-color: var(--accent); }
+  .field input::placeholder,
+  .field textarea::placeholder { color: var(--muted); font-size: 13px; }
+  .field select option { background: #1a1a1a; }
+  .field textarea { resize: vertical; min-height: 72px; }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .pill {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .pill:hover { border-color: var(--accent); color: var(--text); }
+  .pill.on { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+  .gen-btn {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    color: #000;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gen-btn:hover { background: #f0d57a; }
+  .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── RESULTS ── */
+  .results-wrap { margin-top: 12px; animation: up 0.4s ease both; }
+
+  .results-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .results-bar-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+
+  .copy-all {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .copy-all:hover { border-color: var(--accent); color: var(--accent); }
+
+  .pcard {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+
+  .pcard:hover { border-color: #333; }
+
+  .pcard-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .pcard-meta { display: flex; align-items: center; gap: 10px; }
+
+  .pcard-type {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: #000;
+    padding: 3px 8px;
+  }
+
+  .pcard-plat { font-size: 11px; color: var(--muted); }
+  .pcard-num { font-size: 11px; color: var(--border); }
+
+  .pcard-body {
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #ccc;
+    white-space: pre-wrap;
+  }
+
+  .pcard-foot {
+    display: flex;
+    gap: 8px;
+    padding: 9px 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .pcard-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    padding: 5px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .pcard-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .pcard-btn.done { border-color: var(--success); color: var(--success); }
+
+  /* ── HISTORY ── */
+  .hcard {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px 24px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .hcard:hover { border-color: var(--accent); }
+
+  .hcard-left {}
+  .hcard-agent {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .hcard-meta { font-size: 12px; color: var(--muted); }
+  .hcard-badge {
+    display: inline-block;
+    background: var(--accent-dim);
+    border: 1px solid rgba(232,201,109,0.3);
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    margin-right: 8px;
+  }
+
+  .hcard-right { color: var(--muted); font-size: 18px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 80px 24px;
+    color: var(--muted);
+  }
+
+  .empty-icon { font-size: 2.5rem; margin-bottom: 16px; opacity: 0.3; }
+
+  .empty-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    color: #555;
+    margin-bottom: 8px;
+  }
+
+  .empty-sub { font-size: 13px; }
+
+  /* ── MISC ── */
+  .notice {
+    padding: 12px 16px;
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+  }
+
+  .notice.error { background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.25); color: var(--error); }
+  .notice.saved { background: rgba(107,255,184,0.06); border: 1px solid rgba(107,255,184,0.2); color: var(--success); }
+
+  .spin {
+    display: inline-block;
+    width: 13px; height: 13px;
+    border: 2px solid rgba(0,0,0,0.3);
+    border-top-color: #000;
+    border-radius: 50%;
+    animation: rot 0.6s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  @keyframes up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes rot { to { transform: rotate(360deg); } }
+
+  @media (max-width: 700px) {
+    .auth-left { display: none; }
+    .auth-right { width: 100%; border: none; }
+    .grid2 { grid-template-columns: 1fr; }
+    .card { padding: 18px; }
+    .topbar { padding: 0 16px; }
+    .page { padding: 24px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── AUTH ── -->
+<div id="authScreen">
+  <div class="auth-left">
+    <div class="auth-brand">Close<span>Flow</span></div>
+    <div class="auth-brand-sub">The content engine built exclusively for real estate professionals.</div>
+    <div class="auth-feature"><div class="auth-feature-dot"></div><div class="auth-feature-text">30 posts generated in under 10 seconds</div></div>
+    <div class="auth-feature"><div class="auth-feature-dot"></div><div class="auth-feature-text">Instagram, Facebook, LinkedIn, Twitter & TikTok</div></div>
+    <div class="auth-feature"><div class="auth-feature-dot"></div><div class="auth-feature-text">Listings, market updates, tips & testimonials</div></div>
+    <div class="auth-feature"><div class="auth-feature-dot"></div><div class="auth-feature-text">Full history — access your content anytime</div></div>
+  </div>
+  <div class="auth-right">
+    <div class="auth-form-wrap">
+      <div class="auth-title">Welcome back</div>
+      <div class="auth-subtitle">Sign in to your CloseFlow account</div>
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="setMode('login')">Sign In</div>
+        <div class="auth-tab" onclick="setMode('signup')">Create Account</div>
+      </div>
+      <div class="auth-fields">
+        <input class="auth-input" type="email" id="authEmail" placeholder="Email address" />
+        <input class="auth-input" type="password" id="authPassword" placeholder="Password" />
+        <div class="auth-msg" id="authMsg"></div>
+        <button class="auth-btn" id="authBtn" onclick="doAuth()">Sign In</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="appScreen">
+  <div class="topbar">
+    <div class="topbar-logo">Close<span>Flow</span></div>
+    <div class="topbar-nav">
+      <div class="nav-item active" id="navGen" onclick="goTab('gen')">Generate</div>
+      <div class="nav-item" id="navHist" onclick="goTab('hist')">History</div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-pill" id="userPill"></div>
+      <button class="signout-btn" onclick="doSignout()">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- GENERATE -->
+  <div id="tabGen">
+    <div class="page">
+      <div class="page-header">
+        <div class="page-title">Generate Content</div>
+        <div class="page-sub">Fill in your details and get a full month of posts instantly.</div>
+      </div>
+
+      <div class="section-head">Agent Info</div>
+      <div class="card">
+        <div class="grid2">
+          <div class="field">
+            <label>Agent / Team Name</label>
+            <input type="text" id="agentName" placeholder="e.g. Sarah Johnson Realty" />
+          </div>
+          <div class="field">
+            <label>City / Market</label>
+            <input type="text" id="city" placeholder="e.g. Austin, TX" />
+          </div>
+          <div class="field">
+            <label>Brokerage</label>
+            <input type="text" id="brokerage" placeholder="e.g. RE/MAX, Keller Williams..." />
+          </div>
+          <div class="field">
+            <label>Tone</label>
+            <select id="tone">
+              <option>Professional & Trustworthy</option>
+              <option>Warm & Approachable</option>
+              <option>Luxury & Sophisticated</option>
+              <option>Bold & Direct</option>
+              <option>Educational & Informative</option>
+            </select>
+          </div>
+          <div class="field col2">
+            <label>Specialties / USP (optional)</label>
+            <input type="text" id="usp" placeholder="e.g. First-time buyers, luxury condos, investment properties..." />
+          </div>
+          <div class="field col2">
+            <label>Current Listing (optional)</label>
+            <input type="text" id="listing" placeholder="e.g. 3bd/2ba in Oak Park, $485K — just listed" />
+          </div>
+        </div>
+      </div>
+
+      <div class="section-head">Content Types</div>
+      <div class="card">
+        <div class="pills" id="typePills">
+          <div class="pill on" data-v="New Listing">🏡 New Listing</div>
+          <div class="pill on" data-v="Just Sold">🔑 Just Sold</div>
+          <div class="pill on" data-v="Market Update">📊 Market Update</div>
+          <div class="pill on" data-v="Home Buying Tip">💡 Buying Tip</div>
+          <div class="pill on" data-v="Home Selling Tip">📋 Selling Tip</div>
+          <div class="pill" data-v="Neighbourhood Spotlight">📍 Neighbourhood</div>
+          <div class="pill" data-v="Open House">🚪 Open House</div>
+          <div class="pill" data-v="Client Testimonial">⭐ Testimonial</div>
+          <div class="pill" data-v="Interest Rate Update">📉 Rate Update</div>
+        </div>
+      </div>
+
+      <div class="section-head">Platforms & Volume</div>
+      <div class="card">
+        <div class="grid2">
+          <div class="field col2">
+            <label>Platforms</label>
+            <div class="pills" id="platPills">
+              <div class="pill on" data-v="Instagram">Instagram</div>
+              <div class="pill on" data-v="Facebook">Facebook</div>
+              <div class="pill" data-v="LinkedIn">LinkedIn</div>
+              <div class="pill" data-v="Twitter/X">Twitter/X</div>
+              <div class="pill" data-v="TikTok">TikTok</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Posts to Generate</label>
+            <select id="postCount">
+              <option value="5">5 posts — Quick Preview</option>
+              <option value="10" selected>10 posts</option>
+              <option value="20">20 posts</option>
+              <option value="30">30 posts — Full Month</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button class="gen-btn" id="genBtn" onclick="generate()">Generate Content</button>
+      <div class="notice error" id="errBox"></div>
+      <div class="notice saved" id="savedBox">✓ Saved to your history.</div>
+      <div id="resultsWrap" style="display:none" class="results-wrap"></div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div id="tabHist" style="display:none">
+    <div class="page">
+      <div class="page-header">
+        <div class="page-title">History</div>
+        <div class="page-sub">All your past generations — click any to reload the posts.</div>
+      </div>
+      <div id="histList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SB_URL = 'https://jkoecxgkmdfiifrcjfdh.supabase.co';
+const SB_KEY = 'sb_publishable_bc9Sdrar6g6Dg4fc7jX6DQ_Z_3_nnGq';
+const sb = window.supabase.createClient(SB_URL, SB_KEY);
+
+let user = null;
+let mode = 'login';
+let posts = [];
+let histData = [];
+
+// ── AUTH ──
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.
